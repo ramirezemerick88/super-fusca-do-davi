@@ -1,1 +1,95 @@
-delete-me.txt
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+
+<meta charset="UTF-8">
+<title>Super Fusca do Davi</title>
+
+<style>
+
+body{
+margin:0;
+overflow:hidden;
+font-family:Arial, Helvetica, sans-serif;
+background:#000;
+}
+
+#hud{
+
+position:absolute;
+top:10px;
+left:10px;
+color:white;
+font-size:18px;
+background:rgba(0,0,0,0.5);
+padding:10px;
+border-radius:8px;
+
+}
+
+#title{
+
+font-size:22px;
+font-weight:bold;
+
+}
+
+#controls{
+
+margin-top:6px;
+font-size:14px;
+
+}
+
+#speed{
+
+margin-top:8px;
+font-size:16px;
+color:#00ffcc;
+
+}
+
+#footer{
+
+position:absolute;
+bottom:10px;
+right:10px;
+color:white;
+font-size:12px;
+opacity:0.6;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div id="hud">
+
+<div id="title">
+🚗 Super Fusca do Davi
+</div>
+
+<div id="controls">
+↑ acelerar<br>
+↓ frear<br>
+← → virar
+</div>
+
+<div id="speed">
+Velocidade: 0
+</div>
+
+</div>
+
+<div id="footer">
+versão 0.2
+</div>
+
+<script type="module" src="game.js"></script>
+
+</body>
+</html>
