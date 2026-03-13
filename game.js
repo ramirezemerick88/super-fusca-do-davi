@@ -12,9 +12,6 @@ const gameArea = document.getElementById("gameArea");
 jogador = document.createElement("div");
 jogador.classList.add("carro");
 
-jogador.style.left="175px";
-jogador.style.bottom="20px";
-
 gameArea.appendChild(jogador);
 
 jogoRodando = true;
@@ -33,8 +30,6 @@ let carro = document.createElement("div");
 carro.classList.add("inimigo");
 
 carro.style.left = Math.floor(Math.random()*350) + "px";
-
-carro.style.top="-100px";
 
 gameArea.appendChild(carro);
 }
