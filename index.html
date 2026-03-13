@@ -1,271 +1,220 @@
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160/build/three.module.js";
+<!DOCTYPE html>
+<html>
+<head>
 
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x87ceeb);
+<meta charset="UTF-8">
+<title>Super Fusca do Davi</title>
 
-const camera = new THREE.PerspectiveCamera(
-75,
-window.innerWidth/window.innerHeight,
-0.1,
-1000
-);
+<style>
 
-camera.position.set(0,8,15);
+body{
+margin:0;
+overflow:hidden;
+background:#87CEEB;
+font-family:Arial;
+}
 
-const renderer = new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(window.innerWidth,window.innerHeight);
-document.body.appendChild(renderer.domElement);
+canvas{
+display:block;
+}
 
+#hud{
 
-// luz
-
-scene.add(new THREE.AmbientLight(0xffffff,0.7));
-
-const light = new THREE.DirectionalLight(0xffffff,1);
-light.position.set(10,20,10);
-scene.add(light);
-
-
-// chão
-
-const ground = new THREE.Mesh(
-new THREE.PlaneGeometry(2000,2000),
-new THREE.MeshStandardMaterial({color:0x3c8d2f})
-);
-
-ground.rotation.x = -Math.PI/2;
-scene.add(ground);
-
-
-// estrada
-
-const road = new THREE.Mesh(
-new THREE.PlaneGeometry(20,4000),
-new THREE.MeshStandardMaterial({color:0x222222})
-);
-
-road.rotation.x = -Math.PI/2;
-scene.add(road);
-
-
-// linhas da estrada
-
-let roadLines=[];
-
-for(let i=-200;i<200;i+=20){
-
-const line = new THREE.Mesh(
-
-new THREE.PlaneGeometry(1,10),
-
-new THREE.MeshStandardMaterial({color:0xffffff})
-
-);
-
-line.rotation.x=-Math.PI/2;
-line.position.z=i;
-
-scene.add(line);
-
-roadLines.push(line);
+position:absolute;
+top:10px;
+left:10px;
+background:rgba(0,0,0,0.6);
+color:white;
+padding:10px;
+border-radius:8px;
 
 }
 
+</style>
 
-// carro
+</head>
 
-const car = new THREE.Group();
+<body>
 
-const body = new THREE.Mesh(
-new THREE.BoxGeometry(2,0.8,4),
-new THREE.MeshStandardMaterial({color:0xff0000})
-);
+<div id="hud">
 
-const roof = new THREE.Mesh(
-new THREE.BoxGeometry(1.5,0.7,2),
-new THREE.MeshStandardMaterial({color:0xff0000})
-);
+🚗 Super Fusca do Davi<br>
+Pontuação: <span id="score">0</span>
 
-roof.position.y=0.7;
+</div>
+
+<canvas id="game"></canvas>
+
+<script>
+
+const canvas = document.getElementById("game")
+const ctx = canvas.getContext("2d")
+
+canvas.width = window.innerWidth
+canvas.height = window.innerHeight
+
+
+let roadWidth = 250
+let roadX = canvas.width/2-roadWidth/2
+
+let car = {
+
+x: canvas.width/2,
+y: canvas.height-160,
+width:70,
+height:110
+
+}
+
+let obstacles = []
+let score = 0
+let speed = 7
+
+let touchX = car.x
+
+
+// controle touch
+
+canvas.addEventListener("touchmove", e=>{
+
+touchX = e.touches[0].clientX
+
+})
+
+
+// obstáculo
+
+function spawnObstacle(){
+
+obstacles.push({
+
+x: roadX + Math.random()*(roadWidth-60),
+y:-120,
+width:60,
+height:90
+
+})
+
+}
+
+setInterval(spawnObstacle,1000)
+
+
+// desenhar fusca simples
+
+function drawCar(){
+
+ctx.fillStyle="red"
+
+ctx.fillRect(
+
+car.x-car.width/2,
+car.y,
+car.width,
+car.height
+
+)
 
 
 // rodas
 
-function createWheel(x,z){
+ctx.fillStyle="black"
 
-const wheel = new THREE.Mesh(
+ctx.fillRect(car.x-car.width/2-5,car.y+20,10,30)
+ctx.fillRect(car.x+car.width/2-5,car.y+20,10,30)
 
-new THREE.CylinderGeometry(0.4,0.4,0.5,16),
-
-new THREE.MeshStandardMaterial({color:0x111111})
-
-);
-
-wheel.rotation.z=Math.PI/2;
-
-wheel.position.set(x,0,z);
-
-return wheel;
+ctx.fillRect(car.x-car.width/2-5,car.y+60,10,30)
+ctx.fillRect(car.x+car.width/2-5,car.y+60,10,30)
 
 }
 
-car.add(body);
-car.add(roof);
 
-car.add(createWheel(-1,-1.5));
-car.add(createWheel(1,-1.5));
-car.add(createWheel(-1,1.5));
-car.add(createWheel(1,1.5));
+// loop
 
-car.position.y=0.6;
+function update(){
 
-scene.add(car);
+ctx.clearRect(0,0,canvas.width,canvas.height)
 
 
-// controles
+// grama
 
-let keys={};
-
-document.addEventListener("keydown",e=>keys[e.key]=true);
-document.addEventListener("keyup",e=>keys[e.key]=false);
+ctx.fillStyle="#2f7d2f"
+ctx.fillRect(0,0,canvas.width,canvas.height)
 
 
-// física
+// estrada
 
-let speed=0;
-const accel=0.05;
-const maxSpeed=2;
-const friction=0.02;
+ctx.fillStyle="#444"
 
-
-// obstáculos
-
-let obstacles=[];
-
-function spawnObstacle(){
-
-const obstacle=new THREE.Mesh(
-
-new THREE.BoxGeometry(2,2,2),
-
-new THREE.MeshStandardMaterial({color:0xffaa00})
-
-);
-
-obstacle.position.x=(Math.random()-0.5)*12;
-obstacle.position.z=car.position.z-200;
-obstacle.position.y=1;
-
-scene.add(obstacle);
-
-obstacles.push(obstacle);
-
-}
-
-setInterval(spawnObstacle,2000);
+ctx.fillRect(roadX,0,roadWidth,canvas.height)
 
 
-// pontuação
+// linhas da pista
 
-let score=0;
+ctx.strokeStyle="white"
+ctx.setLineDash([20,20])
 
+ctx.beginPath()
+ctx.moveTo(canvas.width/2,0)
+ctx.lineTo(canvas.width/2,canvas.height)
+ctx.stroke()
 
-// animação
-
-function animate(){
-
-requestAnimationFrame(animate);
-
-
-// acelerar
-
-if(keys["ArrowUp"]) speed+=accel;
-
-if(keys["ArrowDown"]) speed-=accel;
-
-speed=Math.max(-maxSpeed,Math.min(maxSpeed,speed));
-
-
-// atrito
-
-if(speed>0) speed-=friction;
-if(speed<0) speed+=friction;
-
-
-// virar
-
-if(keys["ArrowLeft"]) car.position.x-=0.3;
-if(keys["ArrowRight"]) car.position.x+=0.3;
+ctx.setLineDash([])
 
 
 // mover carro
 
-car.position.z-=speed;
+car.x += (touchX-car.x)*0.15
 
 
-// mover linhas da estrada
+// desenhar carro
 
-roadLines.forEach(line=>{
-
-line.position.z+=speed;
-
-if(line.position.z>car.position.z+20){
-
-line.position.z-=400;
-
-}
-
-});
+drawCar()
 
 
-// mover obstáculos
+// obstáculos
+
+ctx.fillStyle="orange"
 
 obstacles.forEach(o=>{
 
-o.position.z+=speed;
+o.y += speed
+
+ctx.fillRect(o.x,o.y,o.width,o.height)
 
 
 // colisão
 
-const dx=o.position.x-car.position.x;
-const dz=o.position.z-car.position.z;
+if(
 
-if(Math.sqrt(dx*dx+dz*dz)<2){
+car.x-car.width/2 < o.x + o.width &&
+car.x+car.width/2 > o.x &&
+car.y < o.y + o.height &&
+car.y + car.height > o.y
 
-alert("Game Over! Pontuação: "+Math.floor(score));
-location.reload();
+){
+
+alert("Game Over! Pontuação: "+score)
+location.reload()
 
 }
 
-});
-
-
-// câmera
-
-camera.position.z=car.position.z+15;
-camera.position.x=car.position.x;
-
-camera.lookAt(car.position);
+})
 
 
 // pontuação
 
-score+=speed;
+score++
+document.getElementById("score").innerText = score
 
 
-// HUD
-
-const hud=document.getElementById("speed");
-
-if(hud){
-
-hud.innerText="Pontuação: "+Math.floor(score);
+requestAnimationFrame(update)
 
 }
 
+update()
 
-renderer.render(scene,camera);
+</script>
 
-}
-
-animate();
+</body>
+</html>
