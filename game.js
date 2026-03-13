@@ -111,7 +111,7 @@ jogador.style.left = esquerda - 20 + "px";
 
 }
 
-if(e.key === "ArrowRight" && esquerda < 350){
+if(e.key === "ArrowRight" && esquerda < 340){
 
 jogador.style.left = esquerda + 20 + "px";
 
