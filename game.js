@@ -1,119 +1,121 @@
-let jogador;
-let pontuacao = 0;
-let velocidade = 5;
-let jogoRodando = false;
+let jogador
+let pontuacao = 0
+let velocidade = 6
+let jogoRodando = false
 
 function iniciarJogo(){
 
-document.getElementById("telaInicial").style.display="none";
+document.getElementById("telaInicial").style.display="none"
 
-const gameArea = document.getElementById("gameArea");
+const gameArea = document.getElementById("gameArea")
 
-jogador = document.createElement("div");
-jogador.classList.add("carro");
+jogador = document.createElement("div")
+jogador.classList.add("carro")
 
-gameArea.appendChild(jogador);
+gameArea.appendChild(jogador)
 
-jogoRodando = true;
+jogoRodando = true
 
-criarInimigo();
+criarInimigo()
 
-requestAnimationFrame(loopJogo);
+requestAnimationFrame(loopJogo)
 
 }
 
 function criarInimigo(){
 
-const gameArea = document.getElementById("gameArea");
+const gameArea = document.getElementById("gameArea")
 
-let carro = document.createElement("div");
+let carro = document.createElement("div")
 
-carro.classList.add("inimigo");
+carro.classList.add("inimigo")
 
-carro.style.left = Math.floor(Math.random()*350) + "px";
+carro.style.left = Math.floor(Math.random()*350) + "px"
 
-gameArea.appendChild(carro);
+gameArea.appendChild(carro)
 
 }
 
 function loopJogo(){
 
-if(!jogoRodando) return;
+if(!jogoRodando) return
 
-let inimigos = document.querySelectorAll(".inimigo");
+let inimigos = document.querySelectorAll(".inimigo")
 
 inimigos.forEach(function(inimigo){
 
-let pos = inimigo.offsetTop;
+let pos = inimigo.offsetTop
 
-inimigo.style.top = pos + velocidade + "px";
+inimigo.style.top = pos + velocidade + "px"
 
 if(pos > 650){
 
-inimigo.remove();
+inimigo.remove()
 
-pontuacao++;
+pontuacao++
 
 document.getElementById("pontuacao").innerText =
-"PONTOS: " + pontuacao;
+"PONTOS: " + pontuacao
 
-criarInimigo();
+criarInimigo()
 
 }
 
 if(colisao(jogador,inimigo)){
 
-fimDeJogo();
+fimDeJogo()
 
 }
 
-});
+})
 
-requestAnimationFrame(loopJogo);
+requestAnimationFrame(loopJogo)
 
 }
 
 function colisao(a,b){
 
-let aRect = a.getBoundingClientRect();
-let bRect = b.getBoundingClientRect();
+let aRect = a.getBoundingClientRect()
+let bRect = b.getBoundingClientRect()
 
 return !(
+
 aRect.bottom < bRect.top ||
 aRect.top > bRect.bottom ||
 aRect.right < bRect.left ||
 aRect.left > bRect.right
-);
+
+)
 
 }
 
 function fimDeJogo(){
 
-jogoRodando=false;
+jogoRodando=false
 
-alert("Fim de jogo! Pontos: " + pontuacao);
+alert("💥 Fim de jogo! Pontos: " + pontuacao)
 
-location.reload();
+location.reload()
 
 }
 
-document.addEventListener("keydown", mover);
+document.addEventListener("keydown", mover)
 
 function mover(e){
 
-if(!jogoRodando) return;
+if(!jogoRodando) return
 
-let esquerda = jogador.offsetLeft;
+let esquerda = jogador.offsetLeft
 
 if(e.key === "ArrowLeft" && esquerda > 0){
 
-jogador.style.left = esquerda - 20 + "px";
+jogador.style.left = esquerda - 20 + "px"
 
 }
 
 if(e.key === "ArrowRight" && esquerda < 340){
 
-jogador.style.left = esquerda + 20 + "px";
+jogador.style.left = esquerda + 20 + "px"
 
 }
 
