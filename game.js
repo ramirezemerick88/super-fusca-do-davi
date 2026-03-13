@@ -19,6 +19,7 @@ jogoRodando = true;
 criarInimigo();
 
 requestAnimationFrame(loopJogo);
+
 }
 
 function criarInimigo(){
@@ -32,6 +33,7 @@ carro.classList.add("inimigo");
 carro.style.left = Math.floor(Math.random()*350) + "px";
 
 gameArea.appendChild(carro);
+
 }
 
 function loopJogo(){
@@ -46,7 +48,7 @@ let pos = inimigo.offsetTop;
 
 inimigo.style.top = pos + velocidade + "px";
 
-if(pos > 600){
+if(pos > 650){
 
 inimigo.remove();
 
@@ -59,9 +61,39 @@ criarInimigo();
 
 }
 
+if(colisao(jogador,inimigo)){
+
+fimDeJogo();
+
+}
+
 });
 
 requestAnimationFrame(loopJogo);
+
+}
+
+function colisao(a,b){
+
+let aRect = a.getBoundingClientRect();
+let bRect = b.getBoundingClientRect();
+
+return !(
+aRect.bottom < bRect.top ||
+aRect.top > bRect.bottom ||
+aRect.right < bRect.left ||
+aRect.left > bRect.right
+);
+
+}
+
+function fimDeJogo(){
+
+jogoRodando=false;
+
+alert("Fim de jogo! Pontos: " + pontuacao);
+
+location.reload();
 
 }
 
