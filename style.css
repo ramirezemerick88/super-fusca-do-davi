@@ -47,36 +47,25 @@ width:10px;
 height:100%;
 background:white;
 left:195px;
-animation:moveRoad 0.5s linear infinite;
-}
-
-@keyframes moveRoad{
-
-0%{
-background-position-y:0;
-}
-
-100%{
-background-position-y:40px;
-}
-
+opacity:0.3;
 }
 
 .carro{
-width:50px;
-height:90px;
+width:60px;
+height:100px;
 position:absolute;
-background:url("img/fusca.png") center/contain no-repeat;
+background:url("fusca.svg") center/contain no-repeat;
 bottom:20px;
-left:175px;
+left:170px;
 }
 
 .inimigo{
 width:50px;
 height:90px;
 position:absolute;
-background:yellow;
+background:red;
 top:-120px;
+border-radius:10px;
 }
 
 #pontuacao{
