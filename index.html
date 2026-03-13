@@ -19,7 +19,6 @@ display:block;
 }
 
 #hud{
-
 position:absolute;
 top:10px;
 left:10px;
@@ -27,7 +26,17 @@ background:rgba(0,0,0,0.6);
 color:white;
 padding:10px;
 border-radius:8px;
+}
 
+#turboBtn{
+position:absolute;
+bottom:40px;
+right:30px;
+background:red;
+color:white;
+padding:20px;
+border-radius:50%;
+font-size:18px;
 }
 
 </style>
@@ -37,13 +46,17 @@ border-radius:8px;
 <body>
 
 <div id="hud">
-
 🚗 Super Fusca do Davi<br>
 Pontuação: <span id="score">0</span>
-
 </div>
 
+<div id="turboBtn">⚡</div>
+
 <canvas id="game"></canvas>
+
+<audio id="engine">
+<source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8b2c2c3b0.mp3?filename=car-engine-loop-110602.mp3">
+</audio>
 
 <script>
 
@@ -53,42 +66,87 @@ const ctx = canvas.getContext("2d")
 canvas.width = window.innerWidth
 canvas.height = window.innerHeight
 
-
-let roadWidth = 250
+let roadWidth = 260
 let roadX = canvas.width/2-roadWidth/2
 
 let car = {
-
 x: canvas.width/2,
 y: canvas.height-160,
 width:70,
 height:110
-
 }
 
-let obstacles = []
-let score = 0
-let speed = 7
+let police = {
+x: canvas.width/2,
+y: canvas.height-350,
+width:70,
+height:110
+}
 
-let touchX = car.x
+let coins=[]
+let obstacles=[]
+
+let score=0
+let speed=6
+let turbo=false
+
+let touchX=car.x
+
+
+// som motor
+
+const engine=document.getElementById("engine")
+
+document.body.addEventListener("touchstart",()=>{
+engine.loop=true
+engine.play()
+})
 
 
 // controle touch
 
 canvas.addEventListener("touchmove", e=>{
-
 touchX = e.touches[0].clientX
-
 })
 
 
-// obstáculo
+// botão turbo
+
+document.getElementById("turboBtn").onclick=()=>{
+
+turbo=true
+
+setTimeout(()=>{
+turbo=false
+},2000)
+
+}
+
+
+// moedas
+
+function spawnCoin(){
+
+coins.push({
+
+x: roadX+Math.random()*(roadWidth-40),
+y:-40,
+size:30
+
+})
+
+}
+
+setInterval(spawnCoin,1500)
+
+
+// obstáculos
 
 function spawnObstacle(){
 
 obstacles.push({
 
-x: roadX + Math.random()*(roadWidth-60),
+x: roadX+Math.random()*(roadWidth-60),
 y:-120,
 width:60,
 height:90
@@ -97,24 +155,21 @@ height:90
 
 }
 
-setInterval(spawnObstacle,1000)
+setInterval(spawnObstacle,2000)
 
 
-// desenhar fusca simples
+// desenhar carro
 
 function drawCar(){
 
 ctx.fillStyle="red"
 
 ctx.fillRect(
-
 car.x-car.width/2,
 car.y,
 car.width,
 car.height
-
 )
-
 
 // rodas
 
@@ -125,6 +180,38 @@ ctx.fillRect(car.x+car.width/2-5,car.y+20,10,30)
 
 ctx.fillRect(car.x-car.width/2-5,car.y+60,10,30)
 ctx.fillRect(car.x+car.width/2-5,car.y+60,10,30)
+
+}
+
+
+// polícia
+
+function drawPolice(){
+
+ctx.fillStyle="blue"
+
+ctx.fillRect(
+police.x-police.width/2,
+police.y,
+police.width,
+police.height
+)
+
+}
+
+
+// cidade
+
+function drawCity(){
+
+ctx.fillStyle="#666"
+
+for(let i=0;i<canvas.height;i+=150){
+
+ctx.fillRect(roadX-120,i,80,120)
+ctx.fillRect(roadX+roadWidth+40,i,80,120)
+
+}
 
 }
 
@@ -142,14 +229,18 @@ ctx.fillStyle="#2f7d2f"
 ctx.fillRect(0,0,canvas.width,canvas.height)
 
 
+// cidade
+
+drawCity()
+
+
 // estrada
 
 ctx.fillStyle="#444"
-
 ctx.fillRect(roadX,0,roadWidth,canvas.height)
 
 
-// linhas da pista
+// linha pista
 
 ctx.strokeStyle="white"
 ctx.setLineDash([20,20])
@@ -164,21 +255,51 @@ ctx.setLineDash([])
 
 // mover carro
 
-car.x += (touchX-car.x)*0.15
+car.x += (touchX-car.x)*0.2
 
 
-// desenhar carro
+// turbo
 
-drawCar()
+let currentSpeed = turbo ? speed*2 : speed
+
+
+// moedas
+
+ctx.fillStyle="yellow"
+
+coins.forEach((c,i)=>{
+
+c.y += currentSpeed
+
+ctx.beginPath()
+ctx.arc(c.x,c.y,c.size/2,0,Math.PI*2)
+ctx.fill()
+
+
+// coletar moeda
+
+if(
+car.x-car.width/2 < c.x+c.size &&
+car.x+car.width/2 > c.x &&
+car.y < c.y+c.size &&
+car.y+car.height > c.y
+){
+
+score+=50
+coins.splice(i,1)
+
+}
+
+})
 
 
 // obstáculos
 
 ctx.fillStyle="orange"
 
-obstacles.forEach(o=>{
+obstacles.forEach((o,i)=>{
 
-o.y += speed
+o.y += currentSpeed
 
 ctx.fillRect(o.x,o.y,o.width,o.height)
 
@@ -186,15 +307,13 @@ ctx.fillRect(o.x,o.y,o.width,o.height)
 // colisão
 
 if(
-
 car.x-car.width/2 < o.x + o.width &&
 car.x+car.width/2 > o.x &&
 car.y < o.y + o.height &&
 car.y + car.height > o.y
-
 ){
 
-alert("Game Over! Pontuação: "+score)
+alert("🚓 Polícia pegou você! Pontuação: "+score)
 location.reload()
 
 }
@@ -202,10 +321,22 @@ location.reload()
 })
 
 
+// polícia perseguindo
+
+police.x += (car.x-police.x)*0.03
+
+drawPolice()
+
+
+// desenhar carro
+
+drawCar()
+
+
 // pontuação
 
 score++
-document.getElementById("score").innerText = score
+document.getElementById("score").innerText=score
 
 
 requestAnimationFrame(update)
